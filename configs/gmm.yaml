@@ -1,0 +1,97 @@
+# GMM SPHS Configuration
+# All hyperparameters for the GMM episodic inference system
+
+problem:
+  K_min: 4              # minimum number of GMM components per episode
+  K_max: 4              # maximum number of components
+  D: 2                  # data dimension
+  N: 500                # number of data points per episode
+  overlap: 0.5          # inter-centroid spacing (0=touching, 1=well-separated)
+                        # 0.3 is easy (well-separated); use 0.5-0.8 to test whether
+                        # the navigator actually adds value over plain BAOAB
+  sigma_scale: 1.0      # scale of true covariances
+  T_batches: 10         # number of streaming batches per episode
+  batch_size: 50        # data points per batch
+                        # must satisfy: N == T_batches * batch_size (500 = 10*50) ✓
+
+particle:
+  n_particles: 64       # number of SPHS particles M
+  # phi layout per particle: [pi_tilde(K) | mu(K*D) | L_vecs(K*D*(D+1)/2)]
+  # for D=2, chol_dim = D*(D+1)/2 = 3
+  # K=2: phi_dim =  2 +  4 +  6 = 12
+  # K=4: phi_dim =  4 +  8 + 12 = 24
+  # K=6: phi_dim =  6 + 12 + 18 = 36  ← phi_dim_max used by navigator
+  prior_std: 1.0        # prior std for initial particle distribution
+
+integrator:
+  h: 0.01               # BAOAB step size
+  K_steps: 20           # inner BAOAB steps per batch
+  friction: 1.0         # default gamma — overridden per-batch by navigator gamma_ep
+  mass: 1.0             # default scalar mass — overridden by navigator M_diag
+  temperature: 1.0      # kT (not used directly; navigator beta scales force)
+
+navigator:
+  # feat_dim is AUTO-COMPUTED by train.py::compute_feat_dim(); this entry is ignored.
+  # Actual = K_max + K_max*D + 1 + len(tau_quantiles) + 7 + 4*C_max = 63
+  # Kept here for documentation only.
+  feat_dim: 63
+  gru_hidden: 128       # GRU hidden state dimension
+  mlp_hidden: 256       # MLP head hidden dimension
+  port_rank: 8          # rank of port-Hamiltonian basis G (unused in mode A)
+  M_type: diagonal      # mass matrix type: diagonal | scalar
+  dt_scale_min: 0.3     # minimum timestep multiplier (slower mixing)
+  dt_scale_max: 3.0     # maximum timestep multiplier (faster mixing)
+  gamma_min: 0.1        # minimum friction
+  gamma_max: 5.0        # maximum friction
+  u_max: 2.0            # control amplitude clipping (mode B/C only)
+  C_max: 8              # per-cluster stats padding length in topo feature vector
+  tau_quantiles: [0.1, 0.25, 0.5, 0.75, 0.9]
+                        # topo_dim = len(tau_quantiles) + 7 + 4*C_max
+                        #          = 5 + 7 + 32 = 44
+
+topology:
+  sigma_rule: silverman # KDE bandwidth rule: silverman | scott | fixed
+  sigma_fixed: 1.0      # used only if sigma_rule: fixed
+  eps_graph: null       # connectivity radius (null = auto: 3*sigma)
+  tau_n_grid: 50        # resolution of C(tau) curve
+  ESS_min: 5.0          # min per-cluster ESS before topology_adjustment fires
+  resample_threshold: 0.5  # resample when global ESS < threshold * M
+  knn_k: 3              # kNN graph connectivity (was 5; lower = tighter basins)
+  tau_operational_quantile: 0.1  # operate at 10th percentile of H (was 0.5=median)
+                        # median tau always sits in the interior of the cloud,
+                        # connecting everything.  10th percentile = dense-basin
+                        # bottoms only, preserving inter-basin barriers.
+
+training:
+  n_episodes: 300      # total training episodes
+                        # optimizer steps = n_episodes / n_accumulate = 500
+                        # warmup steps    = warmup_episodes / n_accumulate = 25
+                        # learning steps  = 500 - 25 = 475
+  lr: 1.0e-4            # peak LR for OneCycleLR
+  grad_clip: 0.5        # gradient norm clip applied before optimizer.step()
+  n_accumulate: 4       # episodes per optimizer step; reduces gradient std by sqrt(4)
+  n_grad_batches: 3     # partial unroll depth: last N batches kept in autograd graph
+                        # increase to 5 once training is stable (richer signal, more memory)
+  warmup_episodes: 100  # LR ramps from lr/10 → lr over first 100 episodes (25 steps)
+  log_interval: 10
+  checkpoint_interval: 200
+  lambda_terminal: 1.0  # Huber loss on permutation-matched posterior means/covariances
+  lambda_topo: 0.1      # PHC topology loss (mode count, cluster entropy)
+  lambda_ess: 0.1       # global ESS regularization
+  lambda_casimir: 0.0   # port-Hamiltonian structural loss (keep 0 for mode A)
+  stop_grad_topo: true  # PHC runs under torch.no_grad
+
+control:
+  mode: A               # A: no control — navigator adapts beta, gamma, M only
+                        #    SMC weights are correct; no Girsanov correction needed
+                        # B: add Gu drift + Girsanov weight correction
+                        # C: free control, no posterior correctness claim
+
+evaluation:
+  n_test_problems: 200
+  metrics: [mse_mu, mse_sigma, coverage_rate, ess, mean_err_sigma_units]
+  baselines: [plain_baoab, em]
+  n_mcmc_steps: 1000
+
+seed: 42
+device: cuda
