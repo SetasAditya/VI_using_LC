@@ -1,0 +1,38 @@
+{
+  "passive_iid": {
+    "mean_purity": 0.7942708333333334,
+    "mean_ari": 0.5239823430085347,
+    "mean_nmi": 0.6231406076841198,
+    "mean_ess": 65.57005818684895,
+    "mean_effective_modes": 2.5287997921307883,
+    "query_accuracy": 1.0,
+    "mean_sensitivity": 0.0,
+    "mean_query_regret": 0.0,
+    "mean_transport_gap": 1.8728919873634975,
+    "final_purity": 0.71875,
+    "final_ari": 0.5611298192564085,
+    "final_nmi": 0.6094011425418211,
+    "final_ess": 44.02418899536133,
+    "final_effective_modes": 1.1097948551177979,
+    "final_query_regret": 0.0,
+    "final_transport_gap": 2.2561936378479004,
+    "final_observed_freq": [
+      0.5364583333333334,
+      0.0546875,
+      0.2682291666666667,
+      0.140625
+    ],
+    "final_observed_hist": [
+      206.0,
+      21.0,
+      103.0,
+      54.0
+    ],
+    "target_freq": [
+      0.5375000238418579,
+      0.08749999850988388,
+      0.24062499403953552,
+      0.13437500596046448
+    ]
+  }
+}

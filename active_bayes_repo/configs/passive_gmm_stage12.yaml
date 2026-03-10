@@ -1,0 +1,102 @@
+seed: 7
+device: cpu
+output_dir: outputs_passive_v2_stage12
+
+data:
+  source: synthetic_gmm
+  dataset_path: outputs_passive_v2_stage12/data/passive_gmm_dataset_v2_stage12.npz
+  external_npz_path: ""
+  save_npz: true
+  query_scheme: passive_iid
+  d_in: 2
+  latent_dim: 2
+  num_classes: 4
+  total_train: 2000
+  total_val: 800
+  total_test: 800
+  feature_noise: 0.02
+  latent_noise: 0.0
+  num_stream_steps: 20
+  num_candidates: 1
+  query_batch_size: 50
+  teacher_scoring: none
+  gmm:
+    overlap_train: 0.18
+    overlap_val: 0.18
+    overlap_test: 0.18
+    sigma_scale: 0.70
+    dirichlet_alpha: 2.2
+    balanced_labels: false
+    share_params: true
+
+model:
+  identity_encoder: true
+  hidden_dim: 64
+  num_particles: 140
+  num_clusters: 4
+  num_level_components: 8
+  obs_sigma: 0.40
+  teacher_sigma: 0.28
+  cluster_tau: 0.60
+  rejuvenation: 0.06
+  teacher_move_steps: 5
+  teacher_move_step_size: 0.05
+  student_move_steps: 2
+  student_move_step_size: 0.03
+  ess_resample_frac: 0.35
+  topology_bandwidth: 0.85
+  mode_merge_tol: 0.75
+  energy_residual_weight: 0.03
+  obs_support_weight: 0.25
+  support_level_blend: 0.25
+
+training:
+  disable_query_training: true
+  projector_epochs: 100
+  topology_pretrain_epochs: 100
+  query_pretrain_epochs: 0
+  assimilator_epochs: 100
+  projector_lr: 0.001
+  topology_pretrain_lr: 0.001
+  assimilator_lr: 0.0007
+  weight_decay: 0.00001
+  grad_clip: 5.0
+  cls_weight: 1.0
+  center_weight: 0.05
+  proj_recon_weight: 0.25
+  topology_cls_weight: 0.25
+  topology_recon_weight: 1.00
+  topology_density_weight: 1.40
+  topology_component_weight: 1.00
+  topology_basin_weight: 0.70
+  query_weight: 0.0
+  query_coverage_weight: 0.0
+  teacher_weight: 1.05
+  basin_weight: 0.90
+  identifiability_weight: 1.35
+  drift_weight: 0.45
+  nll_weight: 0.20
+  contrastive_weight: 0.08
+  level_match_weight: 0.55
+  control_weight: 0.002
+  memory_weight: 0.0005
+  teacher_forcing_prob: 0.0
+  teacher_forcing_prob_start: 0.0
+  teacher_forcing_prob_end: 0.0
+  coverage_guidance_prob_start: 0.0
+  coverage_guidance_prob_end: 0.0
+  teacher_score_temperature: 0.35
+  sinkhorn_epsilon: 0.30
+  basin_sinkhorn_epsilon: 0.35
+  sinkhorn_iters: 30
+  print_every: 1
+
+evaluation:
+  ablation_policies: [passive_iid]
+
+visualization:
+  grid_lim_x: [-8.0, 8.0]
+  grid_lim_y: [-8.0, 8.0]
+  grid_n: 160
+  panel_steps: [0, 2, 4, 6, 8, 10, 15, 20]
+  project_method: pca

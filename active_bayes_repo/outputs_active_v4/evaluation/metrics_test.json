@@ -1,0 +1,18 @@
+{
+  "mean_purity": 1.0,
+  "mean_ari": 0.9324520753093349,
+  "mean_nmi": 0.9498227557320609,
+  "mean_ess": 97.38569259643555,
+  "mean_effective_modes": 1.8290835857391357,
+  "query_accuracy": 0.0,
+  "mean_sensitivity": 1.4179933667182922,
+  "mean_query_regret": 0.8655552268028259,
+  "mean_transport_gap": 3.5506915599107742,
+  "final_purity": 1.0,
+  "final_ari": 1.0,
+  "final_nmi": 1.0,
+  "final_ess": 69.83625793457031,
+  "final_effective_modes": 1.0028247833251953,
+  "final_query_regret": 1.0244841575622559,
+  "final_transport_gap": 4.161874294281006
+}

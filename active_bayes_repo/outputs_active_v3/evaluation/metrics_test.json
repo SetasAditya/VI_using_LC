@@ -1,0 +1,16 @@
+{
+  "mean_purity": 0.9375,
+  "mean_ari": 0.7506189218346572,
+  "mean_nmi": 0.7658419800324079,
+  "mean_ess": 91.0361114501953,
+  "query_accuracy": 0.1,
+  "mean_sensitivity": 0.9783205509185791,
+  "mean_query_regret": 0.5243390798568726,
+  "mean_transport_gap": 3.9325282692909242,
+  "final_purity": 1.0,
+  "final_ari": 1.0,
+  "final_nmi": 1.0,
+  "final_ess": 52.59130859375,
+  "final_query_regret": 0.3681035041809082,
+  "final_transport_gap": 6.158888339996338
+}

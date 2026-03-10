@@ -1,0 +1,11 @@
+{
+  "final_purity": 0.75,
+  "final_ari": 0.7280205355580188,
+  "final_nmi": 0.7587646083480082,
+  "final_ess": 63.03217315673828,
+  "final_effective_modes": 1.002295970916748,
+  "query_accuracy": 1.0,
+  "mean_transport_gap": 2.356287765006224,
+  "mean_sensitivity": 0.0,
+  "mean_query_regret": 0.0
+}

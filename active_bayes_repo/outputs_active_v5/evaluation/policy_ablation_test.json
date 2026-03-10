@@ -1,0 +1,254 @@
+{
+  "learned": {
+    "mean_purity": 0.9416666666666667,
+    "mean_ari": 0.7200889031061539,
+    "mean_nmi": 0.7517410165055659,
+    "mean_ess": 99.1417667388916,
+    "mean_effective_modes": 3.7200334310531615,
+    "query_accuracy": 0.0,
+    "mean_sensitivity": 1.1338973760604858,
+    "mean_query_regret": 0.29632546901702883,
+    "mean_transport_gap": 3.101009476184845,
+    "final_purity": 1.0,
+    "final_ari": 0.48049281314168385,
+    "final_nmi": 0.7271507824894444,
+    "final_ess": 98.31385040283203,
+    "final_effective_modes": 3.9999890327453613,
+    "final_query_regret": 0.6064629554748535,
+    "final_transport_gap": 3.4414255619049072,
+    "final_observed_freq": [
+      0.25,
+      0.041666666666666664,
+      0.625,
+      0.08333333333333333
+    ],
+    "final_observed_hist": [
+      60.0,
+      10.0,
+      150.0,
+      20.0
+    ],
+    "target_freq": [
+      0.5375000238418579,
+      0.08749999850988388,
+      0.24062499403953552,
+      0.13437500596046448
+    ]
+  },
+  "teacher": {
+    "mean_purity": 0.9041666666666666,
+    "mean_ari": 0.6098243198886201,
+    "mean_nmi": 0.6544641653738583,
+    "mean_ess": 101.68772964477539,
+    "mean_effective_modes": 3.0249305725097657,
+    "query_accuracy": 1.0,
+    "mean_sensitivity": 1.0222687244415283,
+    "mean_query_regret": 0.0,
+    "mean_transport_gap": 2.5834419071674346,
+    "final_purity": 0.75,
+    "final_ari": 0.197903014416776,
+    "final_nmi": 0.4893672437736777,
+    "final_ess": 107.53229522705078,
+    "final_effective_modes": 3.9999704360961914,
+    "final_query_regret": 0.0,
+    "final_transport_gap": 2.7229716777801514,
+    "final_observed_freq": [
+      0.3875,
+      0.25833333333333336,
+      0.25,
+      0.10416666666666667
+    ],
+    "final_observed_hist": [
+      93.0,
+      62.0,
+      60.0,
+      25.0
+    ],
+    "target_freq": [
+      0.5375000238418579,
+      0.08749999850988388,
+      0.24062499403953552,
+      0.13437500596046448
+    ]
+  },
+  "centroid_cycle": {
+    "mean_purity": 0.9,
+    "mean_ari": 0.6,
+    "mean_nmi": 0.6,
+    "mean_ess": 115.04079971313476,
+    "mean_effective_modes": 3.762784445285797,
+    "query_accuracy": 0.3,
+    "mean_sensitivity": 1.3707141995429992,
+    "mean_query_regret": 0.5381936073303223,
+    "mean_transport_gap": 2.697840917110443,
+    "final_purity": 0.75,
+    "final_ari": 0.0,
+    "final_nmi": 0.0,
+    "final_ess": 108.85365295410156,
+    "final_effective_modes": 3.9999914169311523,
+    "final_query_regret": 0.5937578678131104,
+    "final_transport_gap": 2.5600802898406982,
+    "final_observed_freq": [
+      0.275,
+      0.275,
+      0.225,
+      0.225
+    ],
+    "final_observed_hist": [
+      66.0,
+      66.0,
+      54.0,
+      54.0
+    ],
+    "target_freq": [
+      0.5375000238418579,
+      0.08749999850988388,
+      0.24062499403953552,
+      0.13437500596046448
+    ]
+  },
+  "round_robin": {
+    "mean_purity": 0.825,
+    "mean_ari": 0.37619939914325445,
+    "mean_nmi": 0.39786775231891813,
+    "mean_ess": 98.23910560607911,
+    "mean_effective_modes": 3.680413317680359,
+    "query_accuracy": 0.3,
+    "mean_sensitivity": 1.5607326030731201,
+    "mean_query_regret": 0.36182713508605957,
+    "mean_transport_gap": 3.4056620359420777,
+    "final_purity": 0.75,
+    "final_ari": 0.0,
+    "final_nmi": 0.0,
+    "final_ess": 42.29045486450195,
+    "final_effective_modes": 3.8404741287231445,
+    "final_query_regret": 0.0,
+    "final_transport_gap": 2.821007251739502,
+    "final_observed_freq": [
+      0.32916666666666666,
+      0.1875,
+      0.25,
+      0.23333333333333334
+    ],
+    "final_observed_hist": [
+      79.0,
+      45.0,
+      60.0,
+      56.0
+    ],
+    "target_freq": [
+      0.5375000238418579,
+      0.08749999850988388,
+      0.24062499403953552,
+      0.13437500596046448
+    ]
+  },
+  "coverage_then_deficit": {
+    "mean_purity": 0.8208333333333334,
+    "mean_ari": 0.4548842864520225,
+    "mean_nmi": 0.5006791398214426,
+    "mean_ess": 105.53012771606446,
+    "mean_effective_modes": 3.7663280248641966,
+    "query_accuracy": 0.3,
+    "mean_sensitivity": 1.1138803124427796,
+    "mean_query_regret": 0.15965906977653505,
+    "mean_transport_gap": 2.919057321548462,
+    "final_purity": 0.9166666666666666,
+    "final_ari": 0.9399477806788512,
+    "final_nmi": 0.8828570207618651,
+    "final_ess": 53.90642547607422,
+    "final_effective_modes": 3.996478319168091,
+    "final_query_regret": 0.15367746353149414,
+    "final_transport_gap": 2.816478967666626,
+    "final_observed_freq": [
+      0.45416666666666666,
+      0.225,
+      0.18333333333333332,
+      0.1375
+    ],
+    "final_observed_hist": [
+      109.0,
+      54.0,
+      44.0,
+      33.0
+    ],
+    "target_freq": [
+      0.5375000238418579,
+      0.08749999850988388,
+      0.24062499403953552,
+      0.13437500596046448
+    ]
+  },
+  "deficit": {
+    "mean_purity": 1.0,
+    "mean_ari": 0.9254346872330108,
+    "mean_nmi": 0.9343808915510696,
+    "mean_ess": 102.38469314575195,
+    "mean_effective_modes": 3.786412262916565,
+    "query_accuracy": 0.3,
+    "mean_sensitivity": 1.2231794238090514,
+    "mean_query_regret": 0.25340116024017334,
+    "mean_transport_gap": 2.8470946669578554,
+    "final_purity": 1.0,
+    "final_ari": 1.0,
+    "final_nmi": 1.0,
+    "final_ess": 79.2846450805664,
+    "final_effective_modes": 3.9999985694885254,
+    "final_query_regret": 0.0,
+    "final_transport_gap": 2.462252616882324,
+    "final_observed_freq": [
+      0.5,
+      0.075,
+      0.275,
+      0.15
+    ],
+    "final_observed_hist": [
+      120.0,
+      18.0,
+      66.0,
+      36.0
+    ],
+    "target_freq": [
+      0.5375000238418579,
+      0.08749999850988388,
+      0.24062499403953552,
+      0.13437500596046448
+    ]
+  },
+  "random": {
+    "mean_purity": 0.9083333333333334,
+    "mean_ari": 0.6887319002789754,
+    "mean_nmi": 0.7054058210794125,
+    "mean_ess": 106.18527145385742,
+    "mean_effective_modes": 3.862076735496521,
+    "query_accuracy": 0.1,
+    "mean_sensitivity": 1.7390039801597594,
+    "mean_query_regret": 0.7065799951553344,
+    "mean_transport_gap": 3.3890157520771025,
+    "final_purity": 0.75,
+    "final_ari": 0.0,
+    "final_nmi": 0.0,
+    "final_ess": 87.86161041259766,
+    "final_effective_modes": 3.999992847442627,
+    "final_query_regret": 0.08892250061035156,
+    "final_transport_gap": 2.9690101146698,
+    "final_observed_freq": [
+      0.375,
+      0.23333333333333334,
+      0.23333333333333334,
+      0.15833333333333333
+    ],
+    "final_observed_hist": [
+      90.0,
+      56.0,
+      56.0,
+      38.0
+    ],
+    "target_freq": [
+      0.5375000238418579,
+      0.08749999850988388,
+      0.24062499403953552,
+      0.13437500596046448
+    ]
+  }
+}

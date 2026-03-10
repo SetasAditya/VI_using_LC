@@ -1,0 +1,48 @@
+seed: 7
+device: cpu
+output_dir: outputs_external
+
+data:
+  source: labeled_npz
+  dataset_path: outputs_external/data/external_cached_dataset.npz
+  external_npz_path: path/to/your_labeled_data.npz
+  save_npz: false
+  d_in: 32
+  latent_dim: 2
+  num_classes: 4
+  num_stream_steps: 8
+  num_candidates: 5
+  query_batch_size: 32
+
+model:
+  identity_encoder: false
+  hidden_dim: 128
+  num_particles: 160
+  num_clusters: 4
+  obs_sigma: 0.55
+  teacher_sigma: 0.45
+  cluster_tau: 0.8
+  rejuvenation: 0.08
+
+training:
+  projector_epochs: 15
+  assimilator_epochs: 20
+  projector_lr: 0.001
+  assimilator_lr: 0.001
+  weight_decay: 0.00001
+  grad_clip: 5.0
+  cls_weight: 1.0
+  center_weight: 0.02
+  query_weight: 1.0
+  teacher_weight: 1.0
+  basin_weight: 0.5
+  nll_weight: 0.5
+  contrastive_weight: 0.05
+  control_weight: 0.005
+  memory_weight: 0.001
+  teacher_forcing_prob: 0.8
+  print_every: 3
+
+visualization:
+  project_method: pca
+  panel_steps: [0, 1, 3, 5, 7]

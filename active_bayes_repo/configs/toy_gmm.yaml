@@ -1,0 +1,50 @@
+seed: 7
+device: cpu
+output_dir: outputs
+
+data:
+  d_in: 16
+  latent_dim: 2
+  num_classes: 4
+  total_train: 1600
+  total_val: 640
+  total_test: 640
+  stream_batch_size: 32
+  num_stream_steps: 10
+  feature_noise: 0.18
+  latent_noise: 0.06
+  save_npz: true
+  dataset_path: outputs/data/toy_gmm_stream.npz
+  gmm:
+    overlap_train: 0.34
+    overlap_val: 0.30
+    overlap_test: 0.28
+    sigma_scale: 1.0
+    dirichlet_alpha: 2.0
+    stream_mode: balanced
+    stream_shuffle: true
+
+model:
+  hidden_dim: 64
+  num_particles: 128
+  num_clusters: 4
+  obs_sigma: 0.55
+  cluster_tau: 0.8
+
+training:
+  projector_epochs: 10
+  assimilator_epochs: 20
+  projector_lr: 0.001
+  assimilator_lr: 0.001
+  weight_decay: 0.00001
+  grad_clip: 5.0
+  cls_weight: 1.0
+  center_weight: 0.05
+  contrastive_weight: 0.10
+  print_every: 5
+
+visualization:
+  grid_lim_x: [-9.0, 9.0]
+  grid_lim_y: [-12.0, 5.0]
+  grid_n: 180
+  panel_steps: [0, 2, 4, 6, 8, 10]
