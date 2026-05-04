@@ -274,7 +274,7 @@ Important sections:
 - The scripts add the repository root to `sys.path`, so they are designed to be launched as `python scripts/<name>.py`.
 - The repo currently has saved checkpoints in `outputs/` and `outputs_modeB/`, which can be used directly for evaluation and visualization.
 - `active_bayes_repo/` appears to be a separate auxiliary subproject with its own `requirements.txt`; it is not required for the main `scripts/train.py` / `scripts/evaluate.py` / `scripts/visualize.py` workflow.
-- `latent_transport/` also looks like a separate experiment and is not needed for the main GMM navigator workflow.
+- `latent_transport/` also looks like an separate experiment and is not needed for the main GMM navigator workflow.
 
 ## Minimal quickstart
 
