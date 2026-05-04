@@ -34,6 +34,8 @@ from typing import List, Optional
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
+from utils.device import resolve_torch_device
+
 import numpy as np
 import torch
 import yaml
@@ -983,7 +985,7 @@ def main():
     with open(args.config) as f:
         cfg = yaml.safe_load(f)
 
-    device  = torch.device(args.device or cfg.get("device", "cpu"))
+    device  = resolve_torch_device(args.device or cfg.get("device", "cpu"))
     out_dir = Path(args.output)
     out_dir.mkdir(parents=True, exist_ok=True)
 

@@ -16,6 +16,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import csv
 import json
 import sys
 from pathlib import Path
@@ -25,6 +26,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import torch
 import yaml
 import numpy as np
+from torch.distributions import MultivariateNormal
 
 from data.gmm_problem import (
     GMMProblem, phi_dim as compute_phi_dim, sample_gmm_problem,
@@ -33,6 +35,112 @@ from data.gmm_problem import (
 from dynamics.gmm_energy import GMMEnergy
 from dynamics.canonicalize import hungarian_match
 from data.gmm_problem import L_vec_to_matrix
+from utils.device import resolve_torch_device
+
+
+def _compute_component_log_joint(
+    X: torch.Tensor,           # [N, D]
+    pi: torch.Tensor,          # [K]
+    mu: torch.Tensor,          # [K, D]
+    Sigma: torch.Tensor,       # [K, D, D]
+    jitter: float = 1e-5,
+) -> torch.Tensor:
+    """Return log p(x_i, z_i=k) for all i,k as [N, K]."""
+    N, D = X.shape
+    K = pi.shape[0]
+    I = torch.eye(D, device=X.device, dtype=X.dtype)
+    out = torch.empty(N, K, device=X.device, dtype=X.dtype)
+    for k in range(K):
+        cov_k = Sigma[k] + jitter * I
+        mvn_k = MultivariateNormal(loc=mu[k], covariance_matrix=cov_k)
+        out[:, k] = torch.log(pi[k].clamp_min(1e-12)) + mvn_k.log_prob(X)
+    return out
+
+
+def compute_responsibilities_A(
+    X: torch.Tensor,           # [N, D]
+    phi_final: torch.Tensor,   # [M, phi_dim]
+    weights: torch.Tensor,     # [M]
+    K: int,
+    D: int,
+) -> torch.Tensor:
+    """
+    Option A: compute responsibilities from a single weighted-mean GMM.
+    Returns:
+        [N, K] responsibilities
+    """
+    pi_tilde, mu, L_vecs = unpack_phi(phi_final, K, D)
+    pi = torch.softmax(pi_tilde, dim=-1)  # [M, K]
+    L = L_vec_to_matrix(L_vecs, D)        # [M, K, D, D]
+    Sigma = L @ L.transpose(-1, -2)       # [M, K, D, D]
+
+    pi_w = (weights.unsqueeze(-1) * pi).sum(0)                                  # [K]
+    mu_w = (weights.unsqueeze(-1).unsqueeze(-1) * mu).sum(0)                    # [K, D]
+    Sigma_w = (weights.unsqueeze(-1).unsqueeze(-1).unsqueeze(-1) * Sigma).sum(0)  # [K, D, D]
+
+    log_joint = _compute_component_log_joint(X, pi_w, mu_w, Sigma_w)
+    return torch.softmax(log_joint, dim=1)
+
+
+def compute_responsibilities_B(
+    X: torch.Tensor,           # [N, D]
+    phi_final: torch.Tensor,   # [M, phi_dim]
+    weights: torch.Tensor,     # [M]
+    K: int,
+    D: int,
+) -> torch.Tensor:
+    """
+    Option B: particle-wise responsibilities, then weight-average over particles.
+    Returns:
+        [N, K] responsibilities
+    """
+    pi_tilde, mu, L_vecs = unpack_phi(phi_final, K, D)
+    pi = torch.softmax(pi_tilde, dim=-1)   # [M, K]
+    L = L_vec_to_matrix(L_vecs, D)         # [M, K, D, D]
+    Sigma = L @ L.transpose(-1, -2)        # [M, K, D, D]
+
+    R = torch.zeros(X.shape[0], K, device=X.device, dtype=X.dtype)
+    for m in range(phi_final.shape[0]):
+        log_joint_m = _compute_component_log_joint(X, pi[m], mu[m], Sigma[m])
+        R_m = torch.softmax(log_joint_m, dim=1)
+        R = R + weights[m] * R_m
+
+    # Numerical safety: enforce rows sum to ~1 exactly.
+    return R / R.sum(dim=1, keepdim=True).clamp_min(1e-12)
+
+
+def write_responsibilities_csv(
+    path: Path,
+    R_A: np.ndarray,
+    R_B: np.ndarray,
+    hard_A: np.ndarray,
+    hard_B: np.ndarray,
+) -> None:
+    """
+    One row per observation (same N as training / problem.X), comma-separated.
+    Columns: row_index, resp_A_cluster_0..K-1, resp_B_cluster_0..K-1, hard_label_A, hard_label_B.
+    """
+    N, K = R_A.shape
+    if R_B.shape != (N, K) or hard_A.shape != (N,) or hard_B.shape != (N,):
+        raise ValueError("R_A, R_B, hard_* shape mismatch")
+
+    header = (
+        ["row_index"]
+        + [f"resp_A_cluster_{j}" for j in range(K)]
+        + [f"resp_B_cluster_{j}" for j in range(K)]
+        + ["hard_label_A", "hard_label_B"]
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with open(path, "w", newline="") as f:
+        w = csv.writer(f)
+        w.writerow(header)
+        for i in range(N):
+            w.writerow(
+                [i]
+                + [float(x) for x in R_A[i]]
+                + [float(x) for x in R_B[i]]
+                + [int(hard_A[i]), int(hard_B[i])]
+            )
 
 
 def mmd_loss(x: torch.Tensor, y: torch.Tensor, sigma: float = 1.0) -> float:
@@ -122,7 +230,7 @@ def evaluate_one_problem(
     problem: GMMProblem,
     cfg: dict,
     device: torch.device,
-) -> dict:
+) -> tuple[dict, dict]:
     """Run inference and compute all metrics for one problem."""
     from training.episode_trainer import EpisodeTrainer
 
@@ -208,7 +316,7 @@ def evaluate_one_problem(
     C_history = info["C_tau_curve"]
     C_final   = C_history[-1] if C_history else 0
 
-    return {
+    metrics = {
         "K": K,
         # Primary parameter metrics
         "mse_mu":    mse_mu,
@@ -228,6 +336,19 @@ def evaluate_one_problem(
         "ess_history":    info["ess_curve"],
         "energy_history": info["energy_curve"],
     }
+
+    # Observation-level cluster probabilities (responsibilities).
+    R_A = compute_responsibilities_A(problem.X, phi_final, weights, K=K, D=D)  # [N, K]
+    R_B = compute_responsibilities_B(problem.X, phi_final, weights, K=K, D=D)  # [N, K]
+    assignments = {
+        "responsibilities_A": R_A.detach().cpu().numpy().astype(np.float32),
+        "responsibilities_B": R_B.detach().cpu().numpy().astype(np.float32),
+        "hard_labels_A": R_A.argmax(dim=1).detach().cpu().numpy().astype(np.int64),
+        "hard_labels_B": R_B.argmax(dim=1).detach().cpu().numpy().astype(np.int64),
+        "weights": weights.detach().cpu().numpy().astype(np.float32),
+        "X": problem.X.detach().cpu().numpy().astype(np.float32),
+    }
+    return metrics, assignments
 
 
 def evaluate_em_baseline(problem: GMMProblem, n_iter: int = 100) -> dict:
@@ -259,12 +380,22 @@ def main():
     parser.add_argument("--device", default=None)
     parser.add_argument("--output", default="outputs/eval_results.json")
     parser.add_argument("--K_fixed", type=int, default=None)
+    parser.add_argument(
+        "--responsibilities_dir",
+        default="outputs/responsibilities",
+        help="Directory to save per-problem A/B responsibilities (.csv and .npz)",
+    )
+    parser.add_argument(
+        "--no_responsibilities_npz",
+        action="store_true",
+        help="If set, only write CSV (skip compressed .npz)",
+    )
     args = parser.parse_args()
 
     with open(args.config) as f:
         cfg = yaml.safe_load(f)
 
-    device = torch.device(args.device or cfg.get("device", "cpu"))
+    device = resolve_torch_device(args.device or cfg.get("device", "cpu"))
 
     # Load navigator — use dimensions from checkpoint, not YAML.
     # The checkpoint may have been trained with a fixed K (--K flag) or
@@ -310,6 +441,8 @@ def main():
 
     results = []
     em_results = []
+    resp_dir = Path(args.responsibilities_dir)
+    resp_dir.mkdir(parents=True, exist_ok=True)
 
     # Determine max K the navigator can handle (its phi_dim determines max K).
     # phi_dim = K + K*D + K*D*(D+1)//2  =>  K_nav_max from stored phi_dim_ck
@@ -332,8 +465,28 @@ def main():
         )
 
         try:
-            r = evaluate_one_problem(navigator, problem, cfg, device)
+            r, assign = evaluate_one_problem(navigator, problem, cfg, device)
             results.append(r)
+            stem = f"problem_{i:04d}_K{K}"
+            csv_path = resp_dir / f"{stem}_responsibilities.csv"
+            write_responsibilities_csv(
+                csv_path,
+                assign["responsibilities_A"],
+                assign["responsibilities_B"],
+                assign["hard_labels_A"],
+                assign["hard_labels_B"],
+            )
+            if not args.no_responsibilities_npz:
+                out_npz = resp_dir / f"{stem}.npz"
+                np.savez_compressed(
+                    out_npz,
+                    responsibilities_A=assign["responsibilities_A"],
+                    responsibilities_B=assign["responsibilities_B"],
+                    hard_labels_A=assign["hard_labels_A"],
+                    hard_labels_B=assign["hard_labels_B"],
+                    weights=assign["weights"],
+                    X=assign["X"],
+                )
         except Exception as e:
             print(f"  Problem {i} failed: {e}")
             continue
@@ -397,6 +550,12 @@ def main():
         import json
         json.dump(out, f, default=str, indent=2)
     print(f"\nResults saved to {args.output}")
+    print(
+        f"Responsibilities CSV (N rows = number of data points) under {resp_dir} "
+        f"as *_responsibilities.csv"
+    )
+    if not args.no_responsibilities_npz:
+        print(f"(Also saved compressed .npz with X and particle weights in the same folder.)")
 
 
 if __name__ == "__main__":

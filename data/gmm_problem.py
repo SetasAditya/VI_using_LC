@@ -20,6 +20,9 @@ import torch
 import torch.distributions as dist
 
 
+import pickle
+import anndata
+
 # ──────────────────────────────────────────────────────────────────────────────
 # Helpers
 # ──────────────────────────────────────────────────────────────────────────────
@@ -184,6 +187,14 @@ def sample_gmm_problem(
 
     # Generate data
     X, labels_true = _sample_gmm_data(N, pi_true, mu_true, L_true, device, rng)
+
+    with open('/Users/dmswanson/Library/CloudStorage/OneDrive-Personal/my_model.pkl', 'rb') as f:
+        loaded_adata = pickle.load(f)
+
+    # X = loaded_adata.X
+    X = loaded_adata.obsm['X_pca'][:,:25]
+    print(X.shape)
+    X = torch.from_numpy(X)
 
     return GMMProblem(
         K=K,

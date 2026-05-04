@@ -22,6 +22,7 @@ from models.gmm_navigator import GMMNavigator
 from topology.phc import PHC
 from topology.diagnostics import TopoDiagnostics
 from training.episode_trainer import EpisodeTrainer
+from utils.device import resolve_torch_device
 
 
 def load_config(path: str) -> dict:
@@ -90,7 +91,7 @@ def main():
         cfg["problem"]["K_min"] = args.K
         cfg["problem"]["K_max"] = args.K
 
-    device = torch.device(cfg.get("device", "cpu"))
+    device = resolve_torch_device(cfg.get("device", "cpu"))
     if cfg.get("seed"):
         torch.manual_seed(cfg["seed"])
 
